@@ -26,6 +26,8 @@ async def lifespan(app: FastAPI):
     # TODO: 清理资源
 
 
+
+
 # 创建 FastAPI 应用
 app = FastAPI(
     title=settings.APP_NAME,
@@ -57,8 +59,12 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-# ==================== 基础路由 ====================
+# ==================== RAG API 路由 ====================
+from src.smartdocrag.api.routes import router as rag_router
+app.include_router(rag_router)
 
+
+# ==================== 基础路由 ====================
 @app.get("/", tags=["健康检查"])
 async def root():
     """根路径欢迎信息"""
