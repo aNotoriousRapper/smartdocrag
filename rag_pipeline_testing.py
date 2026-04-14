@@ -12,27 +12,27 @@ def main():
 
     # 1. 准备测试文档
     test_dir = Path("test_documents")
-    test_dir.mkdir(exist_ok=True)
+    # test_dir.mkdir(exist_ok=True)
 
     # 创建一个测试 Markdown 文件
     test_file = test_dir / "test_doc.md"
-    test_content = """# SmartDocRAG 项目介绍
-
-这是一个用于转行 AI 后端开发的 RAG 系统实战项目。
-
-## 核心技术栈
-- FastAPI：高性能异步 Web 框架
-- LlamaIndex：强大的 RAG 框架
-- PostgreSQL + pgvector：向量数据库
-- BGE-M3：优秀的中英双语嵌入模型
-
-## 项目目标
-帮助开发者快速构建生产级的智能文档问答系统，并用于简历项目。
-
-作者正在一步一步带领你完成整个系统。
-"""
-
-    test_file.write_text(test_content, encoding="utf-8")
+#     test_content = """# SmartDocRAG 项目介绍
+#
+# 这是一个用于转行 AI 后端开发的 RAG 系统实战项目。
+#
+# ## 核心技术栈
+# - FastAPI：高性能异步 Web 框架
+# - LlamaIndex：强大的 RAG 框架
+# - PostgreSQL + pgvector：向量数据库
+# - BGE-M3：优秀的中英双语嵌入模型
+#
+# ## 项目目标
+# 帮助开发者快速构建生产级的智能文档问答系统，并用于简历项目。
+#
+# 作者正在一步一步带领你完成整个系统。
+# """
+#
+#     test_file.write_text(test_content, encoding="utf-8")
     print(f"✅ 测试文档已创建: {test_file}")
 
     # 2. 文档摄入（Ingestion）
@@ -43,9 +43,9 @@ def main():
     # 3. 执行查询
     print("❓ 开始智能查询测试...")
     questions = [
-        "这个项目的主要技术栈是什么？",
-        "项目的目标是什么？",
-        "作者在做什么？"
+        "资料的来源是什么？",
+        "违反兵役法规，逃离部队，如何处理？",
+        "卖淫如何处理？"
     ]
 
     for q in questions:

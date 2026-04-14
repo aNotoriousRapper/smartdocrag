@@ -60,8 +60,9 @@ async def add_process_time_header(request: Request, call_next):
 
 
 # ==================== RAG API 路由 ====================
-from src.smartdocrag.api.routes import router as rag_router
+from src.smartdocrag.api import rag_router, auth_router
 app.include_router(rag_router)
+app.include_router(auth_router)
 
 
 # ==================== 基础路由 ====================

@@ -13,13 +13,13 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # ==================== 数据库配置 ====================
-    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/smartdocrag"
+    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres123@localhost:5432/smartdocrag"
 
     # ==================== Redis 配置 (Celery 使用) ====================
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # ==================== JWT 认证 ====================
-    SECRET_KEY: str = "your-super-secret-key-change-in-production-please"
+    SECRET_KEY: str = "actually_no_need_for_any_encrypt"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24小时
 

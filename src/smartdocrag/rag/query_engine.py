@@ -1,12 +1,15 @@
+from typing import Optional
+
 from llama_index.core import VectorStoreIndex, get_response_synthesizer, Settings
-from llama_index.llms.openai_like import OpenAILike  # ← 改用这个
+from llama_index.llms.openai_like import OpenAILike
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
-from sqlalchemy import make_url
+from llama_index.core.postprocessor import SentenceTransformerRerank
 import logging
 
 from src.smartdocrag.core.config import settings
+from .prompts import get_legal_query_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -44,38 +47,85 @@ class RAGQueryEngine:
 
         self.response_synthesizer = get_response_synthesizer(
             llm=self.llm,
-            response_mode="compact"
+            response_mode="compact",
+            text_qa_template=get_legal_query_prompt,
+        )
+
+        self.reranker = SentenceTransformerRerank(
+            model="BAAI/bge-reranker-base",
+            top_n=3
         )
 
         self.query_engine = RetrieverQueryEngine(
             retriever=self.retriever,
             response_synthesizer=self.response_synthesizer,
+            node_postprocessors=[self.reranker]
         )
 
         logger.info(f"✅ 查询引擎初始化完成 - 模型: {settings.LLM_MODEL} (使用 Chroma)")
 
     # query 方法保持不变
-    def query(self, question: str):
+    def query(self, question: str, debug: bool = True, user_id: Optional[str] = None, collection_name: str = "default"):
+        """执行查询，支持 debug 模式"""
+
+        if user_id is None:
+            user_id = "default"
+
+        collection_full_name = f"user_{user_id}_{collection_name}"
+
         if not settings.LLM_API_KEY.strip():
-            return {"error": "LLM_API_KEY 未设置，请检查 .env 文件"}
+            return {"error": "LLM_API_KEY 未设置"}
 
         try:
-            response = self.query_engine.query(question)
+            # 为当前用户加载对应的 collection
+            collection = self.client.get_or_create_collection(collection_full_name)
+            vector_store = ChromaVectorStore(chroma_collection=collection)
+
+            index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+            retriever = VectorIndexRetriever(
+                index=index,
+                similarity_top_k=settings.TOP_K,
+            )
+
+            response_synthesizer = get_response_synthesizer(
+                llm=self.llm,
+                response_mode="simple_summarize"  # 使用 simple_summarize 减少多次调用
+            )
+
+            query_engine = RetrieverQueryEngine(
+                retriever=retriever,
+                response_synthesizer=response_synthesizer,
+            )
+
+            # 执行查询
+            response = query_engine.query(question)
 
             sources = []
             if hasattr(response, 'source_nodes'):
-                for node in response.source_nodes[:5]:
+                for node in response.source_nodes[:6]:
                     sources.append({
                         "file_name": node.metadata.get("file_name", "未知"),
                         "score": round(float(node.score), 4) if hasattr(node, 'score') else None,
-                        "text_preview": node.text[:150] + "..." if len(node.text) > 150 else node.text
+                        "text_preview": node.text[:180] + "..." if len(node.text) > 180 else node.text
                     })
 
-            return {
+            result = {
                 "answer": str(response),
                 "sources": sources,
-                "metadata": {"model": settings.LLM_MODEL, "top_k": settings.TOP_K}
+                "metadata": {
+                    "model": settings.LLM_MODEL,
+                    "top_k": settings.TOP_K,
+                    "user_id": user_id,
+                    "collection": collection_full_name
+                }
             }
+
+            if debug:
+                print(f"\n🤖 LLM 最终答案: {result['answer'][:500]}...\n")
+
+            return result
+
         except Exception as e:
             logger.error(f"查询失败: {e}")
             return {"error": f"查询出错: {str(e)}"}
