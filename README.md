@@ -16,7 +16,7 @@
 - **后端**：FastAPI (Python 3.12)
 - **RAG 框架**：LlamaIndex
 - **向量数据库**：PostgreSQL + pgvector
-- **嵌入模型**：BGE-M3 (中文强)
+- **嵌入模型**：BGE-M3
 - **LLM**：Grok / Qwen / DeepSeek (OpenAI 兼容接口)
 - **任务队列**：Celery + Redis
 
