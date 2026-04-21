@@ -33,7 +33,7 @@
 用于验证 RAG 系统的实际问答效果，是最核心的交互入口。
 
 <!-- 在这里替换为你的截图 -->
-<!-- ![Query Testing](./assets/问题测试.png) -->
+![Query Testing](./assets/问题测试.png)
 
 **功能说明：**
 - 输入用户问题，触发 RAG 检索 + LLM 生成
@@ -55,7 +55,7 @@
 用于构建知识库的数据入口。
 
 <!-- 在这里替换为你的截图 -->
-<!-- ![Upload](./assets/上传文档.png) -->
+![Upload](./assets/上传文档.png)
 
 **功能说明：**
 - 支持上传本地文档（如 PDF / TXT / Markdown 等）
@@ -77,7 +77,7 @@
 用于对已上传文档进行管理与维护。
 
 <!-- 在这里替换为你的截图 -->
-<!-- ![Management](./assets/文档管理.png) -->
+![Management](./assets/文档管理.png)
 
 **功能说明：**
 - 查看当前知识库中的文档列表
@@ -98,7 +98,7 @@
 基于 **RAGAS** 对系统进行自动化评估。
 
 <!-- 在这里替换为你的截图 -->
-<!-- ![Evaluation](./assets/闭环评估.png) -->
+![Evaluation](./assets/闭环评估.png)
 
 **支持指标：**
 - **Faithfulness（忠诚度）**：答案是否忠于上下文  
@@ -122,7 +122,7 @@
 用于展示 RAG 评估结果的历史变化趋势。
 
 <!-- 在这里替换为你的截图 -->
-<!-- ![Visualization](./assets/结果展示.png) -->
+![Visualization](./assets/结果展示.png)
 
 **功能说明：**
 - 基于历史 CSV 数据生成可视化图表
