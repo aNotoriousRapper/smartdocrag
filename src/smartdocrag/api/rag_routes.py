@@ -8,7 +8,7 @@ import logging
 
 from src.smartdocrag.core.config import settings
 from src.smartdocrag.rag.ingestion import ingestion_pipeline
-from src.smartdocrag.rag.query_engine import query_engine
+from src.smartdocrag.rag import get_query_engine
 from src.smartdocrag.auth.dependencies import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -70,11 +70,12 @@ async def ingest_documents(
 @rag_router.post("/query")
 async def query_documents(
         request: QueryRequest,
+        engine=Depends(get_query_engine),
         current_user: str = Depends(get_current_user)
 ):
     """智能问答（需要登录）"""
     try:
-        result = query_engine.query(
+        result = engine.query(
             question=request.question,
             debug=request.debug,
             user_id=current_user  # 传入用户ID实现隔离
