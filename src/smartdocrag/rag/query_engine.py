@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Optional
 
 from llama_index.core import VectorStoreIndex, get_response_synthesizer, Settings
@@ -9,7 +10,7 @@ from llama_index.core.postprocessor import SentenceTransformerRerank
 import logging
 
 from src.smartdocrag.core.config import settings
-from .prompts import get_legal_query_prompt
+from .prompts import get_query_prompt, get_custom_query_prompt, PYTHON_TECH_QUERY_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class RAGQueryEngine:
             api_base=settings.LLM_API_BASE.rstrip('/'),
             api_key=settings.LLM_API_KEY,
             model=settings.LLM_MODEL,
-            temperature=0.1,
+            temperature=0.0,
             max_tokens=2048,
             is_chat_model=True,
         )
@@ -48,12 +49,12 @@ class RAGQueryEngine:
         self.response_synthesizer = get_response_synthesizer(
             llm=self.llm,
             response_mode="compact",
-            text_qa_template=get_legal_query_prompt,
+            text_qa_template=PYTHON_TECH_QUERY_TEMPLATE,
         )
 
         self.reranker = SentenceTransformerRerank(
             model="BAAI/bge-reranker-base",
-            top_n=3
+            top_n=6
         )
 
         self.query_engine = RetrieverQueryEngine(
@@ -107,7 +108,7 @@ class RAGQueryEngine:
                     sources.append({
                         "file_name": node.metadata.get("file_name", "未知"),
                         "score": round(float(node.score), 4) if hasattr(node, 'score') else None,
-                        "text_preview": node.text[:180] + "..." if len(node.text) > 180 else node.text
+                        "text_preview": node.text
                     })
 
             result = {
@@ -130,6 +131,31 @@ class RAGQueryEngine:
             logger.error(f"查询失败: {e}")
             return {"error": f"查询出错: {str(e)}"}
 
+    def setTopK(self, top_k: int):
+        self.retriever = VectorIndexRetriever(
+            index=self.index,
+            similarity_top_k=top_k,
+        )
+        logging.info(f"已将top K设置为：{top_k}")
 
+    def setPrompt(self, prompt: str):
+        custom_prompt_func = partial(
+            get_custom_query_prompt,
+            prompt=prompt,
+        )
+        logging.info(f"已将prompt设置")
+
+        self.response_synthesizer = get_response_synthesizer(
+            llm=self.llm,
+            response_mode="compact",
+            text_qa_template=custom_prompt_func,
+        )
 # 全局单例
-query_engine = RAGQueryEngine()
+_query_engine = None
+
+def get_query_engine():
+    global _query_engine
+    if _query_engine is None:
+        print("初始化 RAGQueryEngine")
+        _query_engine = RAGQueryEngine()
+    return _query_engine
