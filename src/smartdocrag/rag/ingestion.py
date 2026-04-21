@@ -1,5 +1,6 @@
 from llama_index.core import VectorStoreIndex, StorageContext, Document, Settings, SimpleDirectoryReader
 from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.node_parser import CodeSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 import chromadb
@@ -39,7 +40,8 @@ class RAGIngestion:
 
         self.text_splitter = SentenceSplitter(
             chunk_size=settings.CHUNK_SIZE,
-            chunk_overlap=settings.CHUNK_OVERLAP
+            chunk_overlap=settings.CHUNK_OVERLAP,
+            separator="\n\n"
         )
 
         logger.info(f"✅ RAGIngestion 初始化完成（支持用户隔离）")
